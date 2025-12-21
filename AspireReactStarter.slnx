@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="src/AspireReactStarter.AppHost/AspireReactStarter.AppHost.csproj" />
+  <Project Path="src/AspireReactStarter.BFF/AspireReactStarter.BFF.csproj" />
+  <Project Path="src/AspireReactStarter.Server/AspireReactStarter.Server.csproj" />
+  <Project Path="src/frontend/frontend.esproj">
+    <Build />
+  </Project>
+</Solution>
