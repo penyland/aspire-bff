@@ -1,3 +1,5 @@
+using AspireReactStarter.BFF;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations
@@ -29,5 +31,7 @@ if (!app.Environment.IsDevelopment())
 
 // Map default health check endpoints
 app.MapDefaultEndpoints();
+
+app.MapBffEndpoints();
 
 app.Run();

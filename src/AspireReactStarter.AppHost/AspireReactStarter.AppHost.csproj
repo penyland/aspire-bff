@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\AspireReactStarter.Server\AspireReactStarter.Server.csproj" />
     <ProjectReference Include="..\AspireReactStarter.BFF\AspireReactStarter.BFF.csproj" />
   </ItemGroup>

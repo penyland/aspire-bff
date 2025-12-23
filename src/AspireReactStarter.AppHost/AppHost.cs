@@ -11,8 +11,8 @@ var bff = builder.AddProject<Projects.AspireReactStarter_BFF>("bff")
     .WithHttpHealthCheck("/health")
     .WithExternalHttpEndpoints()
     .WaitFor(server)
-    .WaitFor(webfrontend);
+    .WaitFor(webfrontend)
 
-bff.PublishWithContainerFiles(webfrontend, "wwwroot");
+    .PublishWithContainerFiles(webfrontend, "wwwroot");
 
 builder.Build().Run();

@@ -171,7 +171,7 @@
 }
 
 .weather-section {
-  animation: fadeInUp 0.6s ease-out;
+  animation: fadeInUp 0.6s ease-out both;
   animation-delay: 0.1s;
   flex: 1;
   max-width: 1200px;
@@ -790,5 +790,202 @@
 *:focus-visible {
   outline: 3px solid var(--accent-gradient-end);
   outline-offset: 2px;
+}
+
+/* Navigation Styles */
+.main-nav {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 0.75rem;
+  margin: 0 auto 2rem;
+  max-width: 1200px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--weather-card-border);
+}
+
+.nav-link {
+  padding: 0.5rem 1.25rem;
+  text-decoration: none;
+  color: var(--text-secondary);
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.nav-link:hover {
+  background: rgba(124, 146, 245, 0.1);
+  color: var(--text-primary);
+}
+
+.nav-link:focus-visible {
+  outline: 2px solid var(--accent-gradient-start);
+  outline-offset: 2px;
+}
+
+.nav-link.active,
+.nav-link:global(.active) {
+  background: linear-gradient(135deg, var(--accent-gradient-start), var(--accent-gradient-end));
+  color: white;
+  font-weight: 600;
+}
+
+/* Home Page Styles */
+.home-section {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+}
+
+.welcome-card {
+  text-align: center;
+  padding: 2.5rem 2rem;
+}
+
+.welcome-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.logo-large {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 0 20px rgba(124, 146, 245, 0.3));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.welcome-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(135deg, var(--accent-gradient-start), var(--accent-gradient-end));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcome-description {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.feature-links {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+  margin-top: 1rem;
+}
+
+.feature-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: rgba(124, 146, 245, 0.1);
+  border: 1px solid var(--weather-card-border);
+  border-radius: 0.75rem;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.feature-link:hover {
+  background: linear-gradient(135deg, var(--accent-gradient-start), var(--accent-gradient-end));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(124, 146, 245, 0.3);
+}
+
+.feature-link svg {
+  flex-shrink: 0;
+}
+
+.info-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--divider-color);
+  text-align: left;
+  max-width: 600px;
+  width: 100%;
+}
+
+.info-section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--section-title-color);
+}
+
+.info-section p {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.features-list li {
+  padding-left: 1.5rem;
+  position: relative;
+  color: var(--text-tertiary);
+  line-height: 1.6;
+}
+
+.features-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--accent-gradient-start);
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .welcome-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .welcome-title {
+    font-size: 1.5rem;
+  }
+
+  .welcome-description {
+    font-size: 1rem;
+  }
+
+  .main-nav {
+    padding: 0.5rem 1rem;
+    gap: 0.5rem;
+  }
+
+  .nav-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
 }
 
