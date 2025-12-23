@@ -16,8 +16,7 @@ function Bff() {
         throw new Error(`HTTP error! status: ${res.status}`)
       }
 
-      const data = await res.text()
-      setResponse(data)
+      setResponse('Logged in successfully')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to call /bff/login')
       console.error('Error calling /bff/login:', err)
@@ -27,7 +26,46 @@ function Bff() {
   }
 
   const handleLogout = async () => {
-    throw new Error('Function not implemented.')
+    setLoading(true)
+    setError(null)
+
+    try {
+      const res = await fetch('/bff/logout')
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`)
+      }
+
+      setResponse('Logged out successfully')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to call /bff/logout')
+      console.error('Error calling /bff/logout:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSession = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/bff/session',
+        {
+          method: 'POST'
+        })
+      
+      if (!res.ok) {
+        setResponse('')
+        throw new Error(`HTTP error! status: ${res.status}`)
+      }
+      const data = await res.text()
+      setResponse(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to call /bff/session')
+      console.error('Error calling /bff/session:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -49,7 +87,7 @@ function Bff() {
 
           <button
             className="refresh-button"
-            onClick={handleLogout}
+            onClick={handleSession}
             disabled={loading}
             type="button"
           >Get session</button>

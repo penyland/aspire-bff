@@ -1,9 +1,21 @@
 using AspireReactStarter.BFF;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations
 builder.AddServiceDefaults();
+
+builder.Services.AddAuthentication()
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+    {
+        options.Cookie.Name = "__Host-AuthCookie";
+        options.Cookie.SameSite = SameSiteMode.Strict;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.LoginPath = "/bff/signin";
+    });
+
+builder.Services.AddAuthorization();
 
 // Add YARP reverse proxy
 builder.Services.AddReverseProxy()
@@ -19,6 +31,9 @@ if (!app.Environment.IsDevelopment())
     app.UseDefaultFiles();
     app.UseStaticFiles();
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Map YARP reverse proxy
 app.MapReverseProxy();
