@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using System.Security.Claims;
 
 namespace AspireReactStarter.BFF;
@@ -32,7 +33,7 @@ public static class BffEndpoints
                 RedirectUri = context.BuildRedirectUrl(redirectUrl),
             };
 
-            return TypedResults.SignOut(properties, [CookieAuthenticationDefaults.AuthenticationScheme/*, OpenIdConnectDefaults.AuthenticationScheme*/]);
+            return TypedResults.SignOut(properties, [CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme]);
         });
 
         group.MapGet("/signin", async (string? redirectUrl, HttpContext context) =>
@@ -85,7 +86,7 @@ public static class BffEndpoints
             {
                 authenticationType = context.User.Identity?.AuthenticationType,
                 isAuthenticated = context.User.Identity?.IsAuthenticated,
-                name = context.User.Identity?.Name ?? "Unknown",
+                name = context.User.FindFirstValue("name") ?? "Unknown",
                 email = context.User.Claims.FirstOrDefault(c => c.Type == "email")?.Value
             };
 
