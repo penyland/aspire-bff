@@ -15,18 +15,27 @@ public static class BffEndpoints
             return Results.Ok("BFF is healthy");
         });
 
-        group.MapGet("/login", async (HttpContext context) =>
+        group.MapGet("/login", async (string? redirectUrl, HttpContext context) =>
         {
-            await context.ChallengeAsync(CookieAuthenticationDefaults.AuthenticationScheme, new() { RedirectUri = "/" });
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = context.BuildRedirectUrl(redirectUrl),
+            };
+
+            return TypedResults.Challenge(properties);
         });
 
-        group.MapGet("/logout", async (HttpContext context) =>
+        group.MapGet("logout", (string? redirectUrl, HttpContext context) =>
         {
-            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return Results.Redirect("/");
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = context.BuildRedirectUrl(redirectUrl),
+            };
+
+            return TypedResults.SignOut(properties, [CookieAuthenticationDefaults.AuthenticationScheme/*, OpenIdConnectDefaults.AuthenticationScheme*/]);
         });
 
-        group.MapGet("/signin", async (HttpContext context) =>
+        group.MapGet("/signin", async (string? redirectUrl, HttpContext context) =>
         {
             // Generate claims for the user
             var claims = new List<Claim>
@@ -46,14 +55,12 @@ public static class BffEndpoints
             // Sign in the user
             var authenticationProperties = new AuthenticationProperties
             {
-                RedirectUri = "/",
+                RedirectUri = context.BuildRedirectUrl(redirectUrl),
                 IsPersistent = true,
                 ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1),
             };
 
-            await context.SignInAsync(scheme: CookieAuthenticationDefaults.AuthenticationScheme, principal, authenticationProperties);
-
-            return Results.Redirect("/");
+            return TypedResults.SignIn(principal, authenticationProperties, CookieAuthenticationDefaults.AuthenticationScheme);
         });
 
         group.MapPost("/session", async (HttpContext context) =>

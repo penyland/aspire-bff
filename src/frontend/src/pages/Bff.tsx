@@ -1,48 +1,29 @@
 import { useState } from 'react'
 
+interface Identity {
+  isAuthenticated: boolean
+  name: string
+}
+
+interface SessionData {
+  identity: Identity
+}
+
 function Bff() {
   const [response, setResponse] = useState<string>('')
+  const [userName, setUserName] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleLogin = async () => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const res = await fetch('/bff/login')
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`)
-      }
-
-      setResponse('Logged in successfully')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to call /bff/login')
-      console.error('Error calling /bff/login:', err)
-    } finally {
-      setLoading(false)
-    }
+    // get return url to redirect after login
+    const returnUrl = encodeURIComponent(window.location.pathname);
+    window.location.href = `/bff/login?redirectUrl=${returnUrl}`;
   }
 
   const handleLogout = async () => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const res = await fetch('/bff/logout')
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`)
-      }
-
-      setResponse('Logged out successfully')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to call /bff/logout')
-      console.error('Error calling /bff/logout:', err)
-    } finally {
-      setLoading(false)
-    }
+    const returnUrl = encodeURIComponent(window.location.pathname);
+    window.location.href = `/bff/logout?redirectUrl=${returnUrl}`;
   }
 
   const handleSession = async () => {
@@ -53,13 +34,15 @@ function Bff() {
         {
           method: 'POST'
         })
-      
+
       if (!res.ok) {
         setResponse('')
+        setUserName('')
         throw new Error(`HTTP error! status: ${res.status}`)
       }
-      const data = await res.text()
-      setResponse(data)
+      const data: SessionData = await res.json()
+      setResponse(JSON.stringify(data, null, 2))
+      setUserName(data.identity.name)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to call /bff/session')
       console.error('Error calling /bff/session:', err)
@@ -72,7 +55,9 @@ function Bff() {
     <section className="weather-section" aria-labelledby="weather-heading">
       <div className="card">
         <div className="section-header">
-          <h2 id="weather-heading" className="section-title">Authentication</h2>
+          <h2 id="weather-heading" className="section-title">
+            {!userName ? 'Authentication' : `Hello, ${userName}!`}
+          </h2>
         </div>
 
         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>

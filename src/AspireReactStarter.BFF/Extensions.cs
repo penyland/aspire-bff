@@ -109,4 +109,20 @@ public static class Extensions
             "Microsoft.AspNetCore.Hosting",
             "Microsoft.AspNetCore.Server.Kestrel",
             "System.Net.Http");
+
+    extension(HttpContext context)
+    {
+        public string BuildRedirectUrl(string? redirectUrl)
+        {
+            if (string.IsNullOrEmpty(redirectUrl))
+            {
+                redirectUrl = "/";
+            }
+            if (redirectUrl.StartsWith('/'))
+            {
+                redirectUrl = context.Request.Scheme + "://" + context.Request.Host + context.Request.PathBase + redirectUrl;
+            }
+            return redirectUrl;
+        }
+    }
 }
