@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
 interface Identity {
   isAuthenticated: boolean
@@ -11,18 +13,19 @@ interface SessionData {
 
 function Bff() {
   const [response, setResponse] = useState<string>('')
-  const [userName, setUserName] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const location = useLocation();
+  const { user, checkAuth } = useAuth()
 
   const handleLogin = async () => {
     // get return url to redirect after login
-    const returnUrl = encodeURIComponent(window.location.pathname);
+    const returnUrl = encodeURIComponent(location.pathname);
     window.location.href = `/bff/login?redirectUrl=${returnUrl}`;
   }
 
   const handleLogout = async () => {
-    const returnUrl = encodeURIComponent(window.location.pathname);
+    const returnUrl = encodeURIComponent(location.pathname);
     window.location.href = `/bff/logout?redirectUrl=${returnUrl}`;
   }
 
@@ -37,12 +40,13 @@ function Bff() {
 
       if (!res.ok) {
         setResponse('')
-        setUserName('')
         throw new Error(`HTTP error! status: ${res.status}`)
       }
       const data: SessionData = await res.json()
       setResponse(JSON.stringify(data, null, 2))
-      setUserName(data.identity.name)
+      
+      // Refresh auth context after checking session
+      await checkAuth()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to call /bff/session')
       console.error('Error calling /bff/session:', err)
@@ -56,7 +60,7 @@ function Bff() {
       <div className="card">
         <div className="section-header">
           <h2 id="weather-heading" className="section-title">
-            {!userName ? 'Authentication' : `Hello, ${userName}!`}
+            {!user?.isAuthenticated ? 'Authentication' : `Hello, ${user.name}!`}
           </h2>
         </div>
 
@@ -83,16 +87,6 @@ function Bff() {
             disabled={loading}
             type="button"
           >Logout</button>
-          <button
-            className="refresh-button"
-            onClick={handleLogout}
-            disabled={loading}
-            type="button">Call local api</button>
-          <button
-            className="refresh-button"
-            onClick={handleLogout}
-            disabled={loading}
-            type="button">Call remote api</button>
         </div>
 
         {error && (

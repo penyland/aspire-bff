@@ -14,7 +14,8 @@ keycloakdUsername.WithParentRelationship(keycloak);
 keycloakPassword.WithParentRelationship(keycloak);
 
 var server = builder.AddProject<Projects.AspireReactStarter_Server>("server")
-    .WithHttpHealthCheck("/health");
+    .WaitFor(keycloak)
+    .WithReference(keycloak);
 
 var webfrontend = builder.AddViteApp("webfrontend", "../frontend");
 

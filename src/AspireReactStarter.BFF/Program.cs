@@ -2,15 +2,38 @@ using AspireReactStarter.BFF;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Yarp.ReverseProxy.Transforms;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations
 builder.AddServiceDefaults();
 
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+builder.Services.AddSingleton<AddBearerTokenToHeadersTransform>();
+
 // Add YARP reverse proxy
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"))
+    .AddTransforms(context =>
+    {
+        if (context.Route.AuthorizationPolicy != null)
+        {
+            context.RequestTransforms.Add(context.Services.GetRequiredService<AddBearerTokenToHeadersTransform>());
+        }
+
+        context.RequestTransforms.Add(new RequestHeaderRemoveTransform("Cookie"));
+    })
     .AddServiceDiscoveryDestinationResolver();
 
 builder.Services.AddAuthentication(options =>
@@ -23,7 +46,28 @@ builder.Services.AddAuthentication(options =>
     options.Cookie.Name = "__Host-AuthCookie";
     options.Cookie.SameSite = SameSiteMode.Strict;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.LoginPath = "/bff/signin";
+    options.Events.OnRedirectToLogin = context =>
+    {
+        // For API requests, return 401 instead of redirecting to login
+        if (context.Request.Path.StartsWithSegments("/api"))
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        }
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        // For API requests, return 403 instead of redirecting
+        if (context.Request.Path.StartsWithSegments("/api"))
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return Task.CompletedTask;
+        }
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
 })
 .AddKeycloakOpenIdConnect("keycloak", realm: "bff", options =>
 {
@@ -36,6 +80,24 @@ builder.Services.AddAuthentication(options =>
     options.RequireHttpsMetadata = false;
     options.GetClaimsFromUserInfoEndpoint = true;
     options.MapInboundClaims = false;
+
+    options.Scope.Clear();
+    options.Scope.Add("openid");
+    options.Scope.Add("profile");
+    options.Scope.Add("email");
+    options.Scope.Add("offline_access");
+    options.Scope.Add("api.all");
+
+    options.Events.OnRedirectToIdentityProvider = context =>
+    {
+        // For API requests, return 401 instead of redirecting to identity provider
+        if (context.Request.Path.StartsWithSegments("/api"))
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.HandleResponse();
+        }
+        return Task.CompletedTask;
+    };
 });
 //.AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
 //{
@@ -64,6 +126,8 @@ if (!app.Environment.IsDevelopment())
     app.UseDefaultFiles();
     app.UseStaticFiles();
 }
+
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();

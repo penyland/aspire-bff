@@ -9,6 +9,22 @@ builder.Services.AddProblemDetails();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Services.AddAuthentication()
+    .AddKeycloakJwtBearer("keycloak", realm: "bff", options =>
+    {  
+        options.Audience = "api";
+        options.RequireHttpsMetadata = false;
+    });
+    //.AddJwtBearer(options =>
+    //{
+    //    options.Authority = "http://127.0.0.1:60367/realms/bff";
+    //    options.Audience = "api";
+    //    options.TokenValidationParameters.ValidateAudience = true;
+    //    options.RequireHttpsMetadata = false;
+    //});
+
+builder.Services.AddAuthorizationBuilder();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -35,7 +51,8 @@ api.MapGet("weatherforecast", () =>
         .ToArray();
     return forecast;
 })
-.WithName("GetWeatherForecast");
+.WithName("GetWeatherForecast")
+.RequireAuthorization();
 
 app.MapDefaultEndpoints();
 
